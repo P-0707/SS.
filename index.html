@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success Safe</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            background: url('https://images.pexels.com/photos/247599/pexels-photo-247599.jpeg') no-repeat center center/cover;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #4CAF50;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background: #fff;
+            font-family: 'Times New Roman', serif;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 15px;
+        }
+        .day-header {
+            font-weight: bold;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 6px;
+        }
+        .day {
+            padding: 18px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .day:hover {
+            background: #81c784;
+        }
+        .done {
+            background-color: #66bb6a !important;
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Success Safe</h2>
+        <div class="controls">
+            <select id="year" onchange="generateCalendar()">
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+            </select>
+            <select id="month" onchange="generateCalendar()">
+                <option value="0">January</option>
+                <option value="1">February</option>
+                <option value="2">March</option>
+                <option value="3">April</option>
+                <option value="4">May</option>
+                <option value="5">June</option>
+                <option value="6">July</option>
+                <option value="7">August</option>
+                <option value="8">September</option>
+                <option value="9">October</option>
+                <option value="10">November</option>
+                <option value="11">December</option>
+            </select>
+        </div>
+        <div class="calendar" id="calendar"></div>
+    </div>
+    
+    <script>
+        let data = JSON.parse(localStorage.getItem("plannerData")) || {};
+
+        function generateCalendar() {
+            let calendar = document.getElementById("calendar");
+            calendar.innerHTML = "";
+            let year = document.getElementById("year").value;
+            let month = document.getElementById("month").value;
+            let daysInMonth = new Date(year, parseInt(month) + 1, 0).getDate();
+
+            const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            daysOfWeek.forEach(day => {
+                let header = document.createElement("div");
+                header.classList.add("day-header");
+                header.innerText = day;
+                calendar.appendChild(header);
+            });
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                let dayDiv = document.createElement("div");
+                dayDiv.classList.add("day");
+                dayDiv.innerText = i;
+                let monthFormatted = String(parseInt(month) + 1).padStart(2, '0');
+                let dayFormatted = String(i).padStart(2, '0');
+                let key = `${year}-${monthFormatted}-${dayFormatted}`;
+
+                if (data[key] && data[key].done) {
+                    dayDiv.classList.add("done");
+                }
+
+                dayDiv.onclick = function() {
+                    window.location.href = `tasks.html?year=${year}&month=${month}&day=${i}`;
+                };
+                calendar.appendChild(dayDiv);
+            }
+        }
+
+        generateCalendar();
+    </script>
+</body>
+</html>

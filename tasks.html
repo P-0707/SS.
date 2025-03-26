@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            background: url('https://images.pexels.com/photos/248159/pexels-photo-248159.jpeg') no-repeat center center/cover;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: rgba(200, 200, 200, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            color: #2E7D32;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .date-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1B5E20;
+            margin-bottom: 20px;
+        }
+        .task-list {
+            text-align: left;
+            margin-top: 15px;
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #eeeeee;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border-left: 5px solid #2E7D32;
+        }
+        .task-item label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2E7D32;
+            flex-grow: 1;
+            text-align: left;
+        }
+        .task-item input[type="checkbox"] {
+            transform: scale(1.5);
+            margin-right: 15px;
+        }
+        .delete-btn {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #c9302c;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: 1px solid #999;
+        }
+        button {
+            padding: 12px;
+            background: #2E7D32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        button:hover {
+            background: #1B5E20;
+        }
+        .home-btn {
+            display: block;
+            margin-top: 20px;
+            background: #0277BD;
+            padding: 12px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            border-radius: 8px;
+        }
+        .home-btn:hover {
+            background: #01579B;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="date-display" id="date-title"></div>
+        <div class="input-container" style="font-family: 'Times New Roman', Times, serif;">
+            <input type="text" id="new-task" placeholder="What’s on Your Plate?..." style="font-family: 'Times New Roman', Times, serif;">
+            <button onclick="addTask()" style="font-family: 'Times New Roman', Times, serif;">Queue Up a Mission</button>
+        </div>
+        <div class="task-list" id="task-list"></div>
+        <a href="index.html" class="home-btn">Command Center</a>
+    </div>
+    
+    <script>
+        let params = new URLSearchParams(window.location.search);
+        let year = params.get("year");
+        let month = parseInt(params.get("month"), 10);
+        let day = params.get("day");
+        
+        let monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        let formattedMonth = monthNames[month];
+        let formattedDate = `${day} ${formattedMonth}, ${year}`;
+        
+        document.getElementById("date-title").innerText = `Stepping Stones for ${formattedDate}`;
+
+        let monthFormatted = String(month + 1).padStart(2, '0');
+        let dayFormatted = String(day).padStart(2, '0');
+        let taskKey = `${year}-${monthFormatted}-${dayFormatted}`;
+
+        let data = JSON.parse(localStorage.getItem("plannerData")) || {};
+
+        function loadTasks() {
+            let taskList = document.getElementById("task-list");
+            taskList.innerHTML = "";
+            let tasks = data[taskKey] ? data[taskKey].tasks : [];
+
+            tasks.forEach((task, index) => {
+                let taskDiv = document.createElement("div");
+                taskDiv.classList.add("task-item");
+                taskDiv.innerHTML = `
+                    <input type='checkbox' onchange='toggleTask(${index})' ${task.done ? 'checked' : ''}>
+                    <label>${task.text}</label>
+                    <button class="delete-btn" onclick="deleteTask(${index})">❌</button>
+                `;
+                taskList.appendChild(taskDiv);
+            });
+        }
+
+        function addTask() {
+            let taskInput = document.getElementById("new-task");
+            let newTask = taskInput.value.trim();
+            if (!newTask) return;
+
+            if (!data[taskKey]) data[taskKey] = { tasks: [], done: false };
+            data[taskKey].tasks.push({ text: newTask, done: false });
+            localStorage.setItem("plannerData", JSON.stringify(data));
+            taskInput.value = "";
+            loadTasks();
+        }
+
+        function toggleTask(index) {
+            data[taskKey].tasks[index].done = !data[taskKey].tasks[index].done;
+            data[taskKey].done = data[taskKey].tasks.some(task => task.done);
+            localStorage.setItem("plannerData", JSON.stringify(data));
+            loadTasks();
+        }
+
+        function deleteTask(index) {
+            data[taskKey].tasks.splice(index, 1);
+            if (data[taskKey].tasks.length === 0) delete data[taskKey];
+            localStorage.setItem("plannerData", JSON.stringify(data));
+            loadTasks();
+        }
+
+        loadTasks();
+    </script>
+</body>
+</html>
